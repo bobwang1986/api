@@ -3,6 +3,13 @@ var app = express();
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
 var mongoose = require('mongoose');
+var cors = require('cors');
+
+var corsOptions = {
+	'origin' : '*',
+	'allowedHeaders' : 'Content-Type,X-Requested-With,accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers,token',
+	'exposedHeaders' : 'token'
+};
 
 var jwt = require('jsonwebtoken');//用来创建和确认用户信息摘要
 var config = require('./config'); //读取配置文件config.js信息
@@ -18,6 +25,8 @@ app.set('superSecret', config.secret); // 设置app 的超级密码--用来生�
 //用body parser 来解析post和url信息中的参数
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+
+app.use(cors(corsOptions));
 
 // 使用 morgan 将请求日志打印到控制台
 app.use(morgan('dev'));

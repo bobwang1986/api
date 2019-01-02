@@ -1,118 +1,132 @@
 var express = require("express");
-var tradeInfo = require("../models/tradeInfo");
+var TradeInfo = require("../models/tradeInfo");
 
 var router = express.Router();
 
 
-// 显示所有
+// 显示用户的交易信息
 router.get('/',function(req,res){
-    // 根据分类查找
-    var {user} = req.userId;
+    var {userId} = req.query;
     var whereObj = {};
-    if(user){
+    if(userId){
         var reg = new RegExp('^'+user+'$');
         whereObj = {userId:reg}
-    }
-    //var reg = new RegExp('^'+category+'$')与/^category$/的区别
-    //前者中的category是拼接上的一个变量，是动态的，
-    //后者是静态的只能匹配'category'这个内容
-
-    tradeInfo.find(whereObj,function(err,infos){
-        res.json({
-            success:true,
-            data:infos
+        TradeInfo.find(whereObj,function(err,infos){
+            res.json({
+                success:true,
+                data:infos
+            })
         })
-    })
+    }else{
+        res.json({
+            success:false,
+            data:null
+        })
+    }
 })
 
-// 发布
-// router.post('/',function(req,res){
-//     // 结构赋值
-//     var {title,body,author,tags,hidden,category} = req.body;
-//     console.log(title);
-//     if(title.length<3){
-//         res.json({
-//             success:false,
-//             message:"标题长度不能小于3"
-//         })
-//     }
-//
-//     // 标签格式应该是对象数组
-//
-//     // 把标签分割成数组格式
-//     var tagsArray = tags.split(",");
-//     // 新建一个空数组，用来放对象
-//     var tagsObjArray = [];
-//     // 通过遍历的方式，把标签内容放入对象里面，通过push方式
-//     tagsArray.forEach(function(v){
-//         tagsObjArray.push({title:v});
-//     })
-//
-//     var blog = new Blog({
-//         title,
-//         body,
-//         author,
-//         tags:tagsObjArray,
-//         hidden,
-//         category
-//     });
-//
-//    blog.save(function(err){
-//        if(err){
-//            res.json({success:false,messafe:"发布失败"})
-//        };
-//        res.json({success:true,message:"发布成功"})
-//    })
-// })
-//
-// // 修改
-// router.put('/',function(){
-//     var {title,newTitle,body,newBody,author,newAuthor} = req.body;
-//     if(newTitle.length<3){
-//         res.json({
-//             success:false,
-//             message:"标题长度不能小于3"
-//         })
-//     }
-//     blog.update({
-//         title:title,
-//         body:body,
-//         author:author
-//     },{
-//         title:newTitle,
-//         body:newBody,
-//         author:newAuthor
-//     },function(err,blog){
-//         if(err){
-//             res.json({
-//                 success:false,
-//                 message:"更新失败"
-//             })
-//         }
-//     });
-//     res.json({
-//         success:true,
-//         message:"更新成功"
-//     })
-//
-// })
-//
-// // 删除
-// router.delete('/',function(req,res){
-//
-//     // 解构赋值
-//     var {title} = req.body;
-//
-//     Blog.remove({
-//         title:title,
-//     },function(err){
-//         if(err){
-//             res.json({
-//                 success:false,messge:"删除失败！"
-//             })
-//         }
-//     })
-//     res.json({success:true,message:"删除成功！"})
-// })
+// 买入
+router.post('/',function(req,res){
+    var {code,name,currentPrice,tradePrice,userId,tradeAmount} = req.body;
+    //这里暂时缺少复杂的买入规则校验，目前只包含简单判空
+    if(code && name && tradePrice && userId && tradeAmount){
+        //查询该用户是否已经购买该股票
+        var {code,userId} = req.body;
+        TradeInfo.findOne({code:code,userId:userId},function(err,tradeInfo){
+            if(err){
+                res.json({
+                    success:false,message:"买入查询失败"
+                })
+            }else{
+              if(tradeInfo && tradeInfo.tradePrice && tradeInfo.tradeAmount){
+                  //之前已购买过同一股票，计算当前购买均价
+                  tradePrice = (tradeInfo.tradePrice*tradeInfo.tradeAmount + tradePrice*tradeAmount)/(tradeInfo.tradeAmount*1+tradeAmount*1)
+                  //累加购买数量
+                  tradeAmount = tradeInfo.tradeAmount*1 + tradeAmount*1
+                  var _data = {
+                      code:code,
+                      name:name,
+                      currentPrice:currentPrice,
+                      tradePrice:tradePrice,
+                      userId:userId,
+                      tradeAmount:tradeAmount
+                  }
+                  TradeInfo.updateOne({code:code,userId:userId}, _data, function(err,tradeInfo){
+                      if(err){
+                          res.json({
+                              success:false,message:"买入查询失败"
+                          })
+                      }else{
+                          res.json({success:true,message:"买入更新成功"})
+                      }
+                  })
+              }else{
+                  var tradeInfoNew = new TradeInfo({
+                      code,
+                      name,
+                      currentPrice,
+                      tradePrice,
+                      userId,
+                      tradeAmount
+                  });
+                 tradeInfoNew.save(function(err){
+                     if(err){
+                         res.json({success:false,messafe:"买入失败"})
+                     };
+                     res.json({success:true,message:"买入成功"})
+                 })
+              }
+            }
+        })
+
+    }else{
+        res.json({success:false,messafe:"请完善买入信息"})
+    }
+})
+
+// 卖出
+router.post('/',function(req,res){
+    var {code,name,currentPrice,tradePrice,userId,tradeAmount} = req.body;
+    //这里暂时缺少复杂的买入规则校验，目前只包含简单判空
+    if(code && name && tradePrice && userId && tradeAmount){
+        //查询该用户是否已经购买该股票
+        var {code,userId} = req.body;
+        TradeInfo.findOne({code:code},{userId:userId},function(err,tradeInfo){
+            if(err){
+                res.json({
+                    success:false,message:"更新分类失败"
+                })
+            }else{
+              //卖出数量不得大于当前持有数量
+              if(tradeInfo && tradeInfo.tradePrice && tradeInfo.tradeAmount && tradeInfo.tradeAmount >= tradeAmount){
+                  //只卖部分持仓的情况
+                  if(tradeInfo.tradeAmount > tradeAmount){
+                      //之前已购买过同一股票，计算当前购买均价，了解业务后处理
+                      //tradePrice = (tradeInfo.tradePrice*tradeInfo.tradeAmount - tradePrice*tradeAmount)/(tradeInfo.tradeAmount-tradeAmount)
+                      //累加购买数量
+                      tradeAmount = tradeInfo.tradeAmount-tradeAmount
+                  }
+
+              }
+            }
+        })
+        var tradeInfoNew = new TradeInfo({
+            code,
+            name,
+            currentPrice,
+            tradePrice,
+            userId,
+            tradeAmount
+        });
+       tradeInfoNew.save(function(err){
+           if(err){
+               res.json({success:false,messafe:"买入失败"})
+           };
+           res.json({success:true,message:"买入成功"})
+       })
+    }else{
+        res.json({success:false,messafe:"请完善买入信息"})
+    }
+})
 
 module.exports = router;

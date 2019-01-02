@@ -16,6 +16,8 @@ var config = require('./config'); //读取配置文件config.js信息
 
 var setUser = require('./routers/userManage');// 导入路由文件
 var login = require('./routers/login');// 导入路由文件
+var stock = require('./routers/stock');// 导入路由文件
+var tradeInfo = require('./routers/tradeInfo');// 导入路由文件
 
 //一些配置
 var port = process.env.PORT || 8080; // 设置启动端口
@@ -39,6 +41,8 @@ app.get('/',function(req,res){
 
 app.use('/addUser',setUser);   //添加一个用户
 app.use('/login',login);   //登录 api
+app.use('/stock',stock);   //股票增删改查
+app.use('/tradeInfo',tradeInfo) // 交易相关
 
 // 启动服务
 app.listen(port);

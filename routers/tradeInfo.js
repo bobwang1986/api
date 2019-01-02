@@ -9,7 +9,7 @@ router.get('/',function(req,res){
     var {userId} = req.query;
     var whereObj = {};
     if(userId){
-        var reg = new RegExp('^'+user+'$');
+        var reg = new RegExp('^'+userId+'$');
         whereObj = {userId:reg}
         TradeInfo.find(whereObj,function(err,infos){
             res.json({

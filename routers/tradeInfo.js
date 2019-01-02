@@ -51,6 +51,7 @@ router.post('/',function(req,res){
                       userId:userId,
                       tradeAmount:tradeAmount
                   }
+                  //更新买入信息
                   TradeInfo.updateOne({code:code,userId:userId}, _data, function(err,tradeInfo){
                       if(err){
                           res.json({
@@ -61,6 +62,7 @@ router.post('/',function(req,res){
                       }
                   })
               }else{
+                  // 新买入一支股票
                   var tradeInfoNew = new TradeInfo({
                       code,
                       name,

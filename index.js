@@ -36,7 +36,7 @@ app.use(morgan('dev'));
 //路由
 //基础路由
 app.get('/',function(req,res){
-    res.send("这里是nodejs+mongodb编写restfulAPI的笔记！");
+    res.send("This is a test");
 })
 
 app.use('/addUser',setUser);   //添加一个用户

@@ -35,6 +35,7 @@ router.post('/buy',function(req,res){
         //先查询该股票是否存在
         Stock.findOne({code:code},function(err,item){
           if(item && item.code){
+            name = item.name
             //查询该用户是否已经购买该股票
             TradeInfo.findOne({code:code,userId:userId},function(err,tradeInfo){
                 if(err){
@@ -49,7 +50,7 @@ router.post('/buy',function(req,res){
                       tradeAmount = tradeInfo.tradeAmount*1 + tradeAmount*1
                       var _data = {
                           code:code,
-                          name:name,
+                          name:item.name,
                           currentPrice:currentPrice,
                           tradePrice:tradePrice,
                           userId:userId,

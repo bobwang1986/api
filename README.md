@@ -1,6 +1,9 @@
 # api
 a simple node.js rest api with mongo
 
+#添加管理员
+post     host:8080/addUser
+
 #登录
 post     host:8080/login
 

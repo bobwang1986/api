@@ -94,7 +94,7 @@ router.post('/buy',function(req,res){
         })
 
     }else{
-        res.json({success:false,messafe:"请完善买入信息"})
+        res.json({success:false,message:"请完善买入信息"})
     }
 })
 
@@ -159,7 +159,7 @@ router.post('/sell',function(req,res){
         })
 
     }else{
-        res.json({success:false,messafe:"请完善卖出信息"})
+        res.json({success:false,message:"请完善卖出信息"})
     }
 })
 
